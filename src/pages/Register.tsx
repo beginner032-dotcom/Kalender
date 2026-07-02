@@ -73,7 +73,12 @@ export default function Register() {
         });
       }
     } catch (err: any) {
-      setError(err.message || 'Google Login failed');
+      console.error(err);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError(`Domain ini (${window.location.hostname}) belum diizinkan di Firebase. Silakan tambahkan di Firebase Console > Authentication > Settings > Authorized domains.`);
+      } else {
+        setError(err.message || 'Google Login failed');
+      }
     } finally {
       setLoading(false);
     }
