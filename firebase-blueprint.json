@@ -1,0 +1,59 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "photoUrl": { "type": "string" }
+      },
+      "required": ["name", "email", "createdAt"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "Calendar event or agenda item",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "eventDate": { "type": "string" },
+        "reminderTime": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "isCompleted": { "type": "boolean" }
+      },
+      "required": ["uid", "title", "category", "eventDate", "createdAt", "isCompleted"]
+    },
+    "Holiday": {
+      "title": "Holiday",
+      "description": "National holiday of Indonesia",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "date": { "type": "string", "description": "YYYY-MM-DD" },
+        "description": { "type": "string" },
+        "isNationalHoliday": { "type": "boolean" },
+        "isCutiBersama": { "type": "boolean" }
+      },
+      "required": ["title", "date", "isNationalHoliday", "isCutiBersama"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles."
+    },
+    "/events/{eventId}": {
+      "schema": "Event",
+      "description": "Stores all user events."
+    },
+    "/holiday_indonesia/{holidayId}": {
+      "schema": "Holiday",
+      "description": "Stores national holidays for Indonesia."
+    }
+  }
+}
