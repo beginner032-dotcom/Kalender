@@ -73,7 +73,7 @@ export default function Agenda() {
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{dateKey}</h3>
               <div className="space-y-4">
                 {groupedEvents[dateKey].map(evt => {
-                  const catIndex = CATEGORIES.indexOf(evt.category) || 0;
+                  const catIndex = Math.max(0, CATEGORIES.indexOf(evt.category));
                   const colors = [
                     'border-l-blue-500 text-blue-600 bg-blue-50', 
                     'border-l-green-500 text-green-600 bg-green-50', 

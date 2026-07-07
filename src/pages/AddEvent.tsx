@@ -21,7 +21,10 @@ export default function AddEvent() {
   const [loading, setLoading] = useState(false);
 
   const handleSave = async () => {
-    if (!title || !eventDate || !eventTime || !user) return;
+    if (!title.trim() || !eventDate || !eventTime || !user) {
+      alert("Judul event harus diisi!");
+      return;
+    }
     
     setLoading(true);
     try {
@@ -38,9 +41,11 @@ export default function AddEvent() {
       };
       
       await addDoc(collection(db, 'events'), newEvent);
+      alert("Event berhasil disimpan!");
       navigate(-1);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert("Gagal menyimpan event: " + e.message);
     } finally {
         setLoading(false);
     }
@@ -53,7 +58,7 @@ export default function AddEvent() {
           <ArrowLeft className="w-6 h-6" />
         </button>
         <h1 className="text-lg font-medium tracking-tight">Tambah Event</h1>
-        <button onClick={handleSave} disabled={loading} className="p-2 -mr-2 rounded-full text-[#1C1B1F] dark:text-white">
+        <button onClick={handleSave} disabled={loading || !title.trim()} className="p-2 -mr-2 rounded-full text-[#1C1B1F] dark:text-white disabled:opacity-50">
           <Check className="w-6 h-6" />
         </button>
       </div>
@@ -127,7 +132,7 @@ export default function AddEvent() {
       </div>
       
       <div className="mt-auto pt-6">
-          <Button onClick={handleSave} disabled={loading} className="w-full bg-[#1C1B1F] hover:bg-black h-12 rounded-2xl text-white font-medium shadow-none">
+          <Button onClick={handleSave} disabled={loading || !title.trim()} className="w-full bg-[#1C1B1F] hover:bg-black h-12 rounded-2xl text-white font-medium shadow-none disabled:opacity-50">
             {loading ? 'Menyimpan...' : 'Simpan Event'}
           </Button>
       </div>

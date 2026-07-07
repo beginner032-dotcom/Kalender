@@ -102,16 +102,37 @@ export function initializeAppStore() {
             });
           }
         }
+      }, (err) => {
+        console.error("Firestore user sync permission denied. Have you updated your Firestore Security Rules?", err);
       });
       
       // Load events
       const q = query(collection(db, 'events'), where('uid', '==', firebaseUser.uid));
       unsubscribeEvents = onSnapshot(q, (snapshot) => {
-        const evts = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data()
-        })) as AppEvent[];
+        const evts = snapshot.docs.map((doc) => {
+          const data = doc.data();
+          let eventDate = data.eventDate;
+          if (!eventDate) {
+            // Fallback for old documents that had 'date' and 'time'
+            if (data.date) {
+              try {
+                eventDate = new Date(`${data.date}T${data.time || '00:00'}`).toISOString();
+              } catch (e) {
+                eventDate = new Date().toISOString();
+              }
+            } else {
+              eventDate = new Date().toISOString();
+            }
+          }
+          return {
+            id: doc.id,
+            ...data,
+            eventDate
+          };
+        }) as AppEvent[];
         useAppStore.getState().setEvents(evts);
+      }, (err) => {
+        console.error("Firestore events sync permission denied. Have you updated your Firestore Security Rules?", err);
       });
     } else {
       useAppStore.getState().setUser(null);

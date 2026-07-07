@@ -136,7 +136,7 @@ export default function Calendars() {
             </div>
           ) : (
             selectedDayEvents.map(evt => {
-              const catIndex = CATEGORIES.indexOf(evt.category) || 0;
+              const catIndex = Math.max(0, CATEGORIES.indexOf(evt.category));
               const colors = [
                 'border-l-blue-500 text-blue-600 bg-blue-50', 
                 'border-l-green-500 text-green-600 bg-green-50', 

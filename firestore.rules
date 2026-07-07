@@ -1,67 +1,21 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
-    }
-
     function isSignedIn() {
       return request.auth != null;
     }
-
-    function isOwner(uid) {
-      return isSignedIn() && request.auth.uid == uid;
+    
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
     }
     
-    function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function incoming() {
-      return request.resource.data;
-    }
-
-    function existing() {
-      return resource.data;
-    }
-
-    function isValidUser(data) {
-      return data.keys().hasAll(['name', 'email', 'createdAt']) &&
-             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
-             data.email is string && data.email.size() > 0 && data.email.size() <= 200 &&
-             data.createdAt is number;
-    }
-
-    match /users/{userId} {
-      allow get: if isOwner(userId);
-      allow create: if isOwner(userId) && isValidId(userId) && isValidUser(incoming());
-      allow update: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == existing().createdAt;
-    }
-
-    function isValidEvent(data) {
-      return data.keys().hasAll(['uid', 'title', 'category', 'eventDate', 'createdAt', 'isCompleted']) &&
-             data.uid is string && data.uid == request.auth.uid &&
-             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
-             data.category is string && data.category.size() > 0 && data.category.size() <= 100 &&
-             data.eventDate is string && data.eventDate.size() <= 30 &&
-             data.createdAt is number &&
-             data.isCompleted is bool;
-    }
-
     match /events/{eventId} {
-      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
-      allow create: if isSignedIn() && isValidId(eventId) && isValidEvent(incoming());
-      allow update: if isSignedIn() && existing().uid == request.auth.uid && isValidEvent(incoming()) && incoming().uid == existing().uid && incoming().createdAt == existing().createdAt;
-      allow delete: if isSignedIn() && existing().uid == request.auth.uid;
-      
-      // Allow list requires resource.data.uid check
-      allow list: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read, update, delete: if isSignedIn() && request.auth.uid == resource.data.uid;
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.uid;
     }
-
+    
     match /holiday_indonesia/{holidayId} {
-      // Holidays are read-only for users (presumably written by admin or script)
-      allow read: if isSignedIn() || !isSignedIn(); // Public holidays
+      allow read: if true; 
     }
   }
 }
