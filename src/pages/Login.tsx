@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, browserPopupRedirectResolver } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
@@ -38,7 +38,7 @@ export default function Login() {
     setError('');
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
       const user = result.user;
       
       // Check if user exists in db
@@ -56,7 +56,13 @@ export default function Login() {
     } catch (err: any) {
       console.error(err);
       if (err.code === 'auth/unauthorized-domain') {
-        setError(`Domain ini (${window.location.hostname}) belum diizinkan di Firebase. Silakan tambahkan di Firebase Console > Authentication > Settings > Authorized domains.`);
+        setError(`Domain ini (${window.location.hostname}) belum diizinkan. Tambahkan di Firebase Console > Authentication > Settings > Authorized domains.`);
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Login Google belum diaktifkan. Silakan aktifkan provider Google di Firebase Console > Authentication > Sign-in method.');
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
+      } else if (err.code === 'auth/popup-closed-by-user') {
+        setError('Login dibatalkan.');
       } else {
         setError(err.message || 'Google Login failed');
       }
