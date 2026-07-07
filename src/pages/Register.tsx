@@ -45,7 +45,7 @@ export default function Register() {
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.');
       } else {
-        setError(err.message || 'Registration failed');
+        setError(`Registration failed: ${err.message} (${err.code})`);
       }
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export default function Register() {
           setError(redirectErr.message || 'Google Login redirect failed');
         }
       } else if (err.code === 'auth/unauthorized-domain') {
-        setError(`Domain ini sudah Anda tambahkan, namun Firebase membutuhkan waktu (kadang hingga 15-30 menit) untuk memperbarui server mereka. Mohon tunggu sejenak, bersihkan cache browser di HP Anda, lalu coba lagi.`);
+        setError(`Domain (${window.location.hostname}) sedang menunggu update dari server Firebase (bisa memakan waktu 15-30 menit setelah ditambahkan). Sementara menunggu, Anda bisa menggunakan Email & Password untuk mendaftar/masuk.`);
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('Login Google belum diaktifkan. Silakan aktifkan provider Google di Firebase Console > Authentication > Sign-in method.');
       } else if (err.code === 'auth/popup-closed-by-user') {
