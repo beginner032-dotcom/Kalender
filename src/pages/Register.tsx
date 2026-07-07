@@ -107,7 +107,23 @@ export default function Register() {
           <p className="text-zinc-500 mb-8 text-[15px] shrink-0">Daftar untuk memulai</p>
 
         <form onSubmit={handleRegister} className="w-full space-y-4 shrink-0">
-          {error && <div className="text-[#D32F2F] text-sm bg-red-50 p-3 rounded-xl border border-red-100">{error}</div>}
+          {error && (
+            <div className="bg-red-50 p-4 rounded-2xl border border-red-100 flex flex-col gap-2">
+              <span className="text-[#D32F2F] text-[14px] leading-relaxed">{error}</span>
+              {error.includes('belum diizinkan') && (
+                <div className="bg-white/60 p-2.5 rounded-xl border border-red-200/50 flex justify-between items-center mt-1">
+                  <code className="text-red-800 text-xs font-mono select-all">{window.location.hostname}</code>
+                  <button 
+                    type="button" 
+                    onClick={() => navigator.clipboard.writeText(window.location.hostname)}
+                    className="text-xs font-medium text-[#D32F2F] bg-white px-3 py-1.5 rounded-lg shadow-sm border border-red-100 active:scale-95 transition-all"
+                  >
+                    Salin
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           <div className="relative">
             <User className="w-5 h-5 absolute left-4 top-4.5 text-zinc-400" />
             <Input type="text" placeholder="Nama Lengkap" value={name} onChange={e => setName(e.target.value)} required className="rounded-2xl bg-white border border-zinc-200/60 shadow-sm h-14 pl-12 text-[15px]" />
