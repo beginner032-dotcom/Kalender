@@ -143,8 +143,8 @@ export default function Login() {
             Masuk dengan Google
         </Button>
 
-        <div className="mt-8 text-[15px] text-zinc-500 shrink-0">
-          Belum punya akun? <Link to="/register" className="text-[#D32F2F] font-bold hover:underline">Daftar</Link>
+        <div className="mt-8 text-[15px] mb-8 text-zinc-500 shrink-0 text-center flex flex-col gap-1">
+          <span>Belum punya akun? <Link to="/register" className="text-[#D32F2F] font-bold hover:underline">Daftar</Link></span><span className="text-[10px] opacity-40">Versi: 2.1 (Update Vercel)</span>
         </div>
       </div>
       </div>
