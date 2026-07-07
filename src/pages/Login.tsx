@@ -37,37 +37,37 @@ export default function Login() {
     setLoading(true);
     setError('');
     const provider = new GoogleAuthProvider();
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
-      if (isMobile) {
-        await signInWithRedirect(auth, provider);
-        return; // Redirects away
-      } else {
-        const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
-        const user = result.user;
-        
-        // Check if user exists in db
-        const userRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userRef);
-        
-        if (!userDoc.exists()) {
-          await setDoc(userRef, {
-            name: user.displayName || 'User',
-            email: user.email,
-            createdAt: Date.now(),
-            photoUrl: user.photoURL || '',
-          });
-        }
+      const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+      const user = result.user;
+      
+      // Check if user exists in db
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName || 'User',
+          email: user.email,
+          createdAt: Date.now(),
+          photoUrl: user.photoURL || '',
+        });
       }
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/unauthorized-domain') {
-        setError(`Domain ini (${window.location.hostname}) belum diizinkan. Tambahkan di Firebase Console > Authentication > Settings > Authorized domains.`);
+      if (err.code === 'auth/popup-blocked') {
+        // Fallback to redirect if popup is blocked on mobile
+        try {
+          await signInWithRedirect(auth, provider);
+          return;
+        } catch (redirectErr: any) {
+          setError(redirectErr.message || 'Google Login redirect failed');
+        }
+      } else if (err.code === 'auth/unauthorized-domain') {
+        setError(`Domain ${window.location.hostname} sedang dalam proses verifikasi Firebase. Mohon tunggu sekitar 2-5 menit lalu refresh halaman ini.`);
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('Login Google belum diaktifkan. Silakan aktifkan provider Google di Firebase Console > Authentication > Sign-in method.');
-      } else if (err.code === 'auth/popup-blocked') {
-        setError('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
       } else if (err.code === 'auth/popup-closed-by-user') {
         setError('Login dibatalkan.');
       } else {
