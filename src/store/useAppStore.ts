@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { UserProfile, AppEvent, Holiday } from '../types';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
-import { collection, query, where, onSnapshot, getDocs, doc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface AppState {
   user: UserProfile | null;
@@ -76,6 +76,25 @@ export async function fetchHolidaysForYear(year: number) {
 export function initializeAppStore() {
   const { setTheme, theme } = useAppStore.getState();
   setTheme(theme); // apply initial theme
+
+  // Check for redirect result from Google Login on mobile
+  getRedirectResult(auth).then(async (result) => {
+    if (result && result.user) {
+      const user = result.user;
+      const userRef = doc(db, 'users', user.uid);
+      const userDoc = await getDoc(userRef);
+      if (!userDoc.exists()) {
+        await setDoc(userRef, {
+          name: user.displayName || 'User',
+          email: user.email,
+          createdAt: Date.now(),
+          photoUrl: user.photoURL || '',
+        });
+      }
+    }
+  }).catch((err) => {
+    console.error("Redirect login error:", err);
+  });
 
   onAuthStateChanged(auth, (firebaseUser) => {
     if (firebaseUser) {

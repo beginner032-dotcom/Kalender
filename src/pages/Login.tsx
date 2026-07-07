@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, browserPopupRedirectResolver } from 'firebase/auth';
+import { signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, GoogleAuthProvider, browserPopupRedirectResolver } from 'firebase/auth';
 import { auth, db } from '../lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
@@ -37,21 +37,28 @@ export default function Login() {
     setLoading(true);
     setError('');
     const provider = new GoogleAuthProvider();
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
     try {
-      const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
-      const user = result.user;
-      
-      // Check if user exists in db
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-      
-      if (!userDoc.exists()) {
-        await setDoc(userRef, {
-          name: user.displayName || 'User',
-          email: user.email,
-          createdAt: Date.now(),
-          photoUrl: user.photoURL || '',
-        });
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return; // Redirects away
+      } else {
+        const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+        const user = result.user;
+        
+        // Check if user exists in db
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            name: user.displayName || 'User',
+            email: user.email,
+            createdAt: Date.now(),
+            photoUrl: user.photoURL || '',
+          });
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -66,7 +73,6 @@ export default function Login() {
       } else {
         setError(err.message || 'Google Login failed');
       }
-    } finally {
       setLoading(false);
     }
   };
