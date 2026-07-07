@@ -22,7 +22,7 @@ export default function Login() {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (err: any) {
       if (err.code === 'auth/operation-not-allowed') {
-         setError('Login Email & Password belum diaktifkan. Silakan aktifkan di Firebase Console, atau gunakan login Google di bawah.');
+         setError('Login Email & Password sudah diaktifkan, namun Firebase membutuhkan waktu beberapa menit untuk memperbarui sistem. Mohon tunggu 2-5 menit dan coba lagi.');
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
          setError('Email atau password yang Anda masukkan salah.');
       } else {

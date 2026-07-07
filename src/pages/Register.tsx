@@ -41,7 +41,7 @@ export default function Register() {
       
     } catch (err: any) {
       if (err.code === 'auth/operation-not-allowed') {
-        setError('Pendaftaran Email & Password belum diaktifkan oleh admin. Silakan aktifkan di Firebase Console, atau gunakan daftar dengan Google di bawah.');
+        setError('Pendaftaran Email & Password sudah diaktifkan, namun Firebase membutuhkan waktu beberapa menit untuk memperbarui sistem. Mohon tunggu 2-5 menit dan coba lagi.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('Email sudah terdaftar. Silakan gunakan email lain atau masuk ke akun Anda.');
       } else {
