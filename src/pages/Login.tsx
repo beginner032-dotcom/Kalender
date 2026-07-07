@@ -37,35 +37,35 @@ export default function Login() {
     setLoading(true);
     setError('');
     const provider = new GoogleAuthProvider();
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     try {
-      const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
-      const user = result.user;
-      
-      // Check if user exists in db
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-      
-      if (!userDoc.exists()) {
-        await setDoc(userRef, {
-          name: user.displayName || 'User',
-          email: user.email,
-          createdAt: Date.now(),
-          photoUrl: user.photoURL || '',
-        });
+      if (isMobile) {
+        await signInWithRedirect(auth, provider);
+        return;
+      } else {
+        const result = await signInWithPopup(auth, provider, browserPopupRedirectResolver);
+        const user = result.user;
+        
+        // Check if user exists in db
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (!userDoc.exists()) {
+          await setDoc(userRef, {
+            name: user.displayName || 'User',
+            email: user.email,
+            createdAt: Date.now(),
+            photoUrl: user.photoURL || '',
+          });
+        }
       }
     } catch (err: any) {
       console.error(err);
-      if (err.code === 'auth/popup-blocked') {
-        // Fallback to redirect if popup is blocked on mobile
-        try {
-          await signInWithRedirect(auth, provider);
-          return;
-        } catch (redirectErr: any) {
-          setError(redirectErr.message || 'Google Login redirect failed');
-        }
-      } else if (err.code === 'auth/unauthorized-domain') {
-        setError(`Domain ${window.location.hostname} sedang dalam proses verifikasi Firebase. Mohon tunggu sekitar 2-5 menit lalu refresh halaman ini.`);
+      if (err.code === 'auth/unauthorized-domain') {
+        setError(`Domain ini (${window.location.hostname}) belum diizinkan oleh Firebase. Pastikan domain tertulis persis seperti ini di pengaturan Firebase Anda (tanpa https:// atau spasi).`);
+      } else if (err.code === 'auth/popup-blocked') {
+        setError('Popup diblokir oleh browser. Silakan izinkan popup untuk situs ini.');
       } else if (err.code === 'auth/operation-not-allowed') {
         setError('Login Google belum diaktifkan. Silakan aktifkan provider Google di Firebase Console > Authentication > Sign-in method.');
       } else if (err.code === 'auth/popup-closed-by-user') {
